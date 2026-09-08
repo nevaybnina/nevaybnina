@@ -1,6 +1,6 @@
 import './globals.css';
 
-const siteUrl = 'https://nevaybnina.vercel.app';
+const siteUrl = 'https://www.nevaybnina.ru';
 
 export const metadata = {
   metadataBase: new URL(siteUrl),
