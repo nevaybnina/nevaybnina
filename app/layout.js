@@ -1,8 +1,16 @@
 import './globals.css';
 
+const siteUrl = 'https://nevaybnina.vercel.app';
+
 export const metadata = {
+  metadataBase: new URL(siteUrl),
   title: 'nevaybnina',
   description: 'Считаем дни до важных событий команды',
+  openGraph: {
+    siteName: 'nevaybnina',
+    locale: 'ru_RU',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({ children }) {
