@@ -149,12 +149,14 @@ export default function EventCountdown({ event }) {
       </div>
 
       <div className="meta reveal d5">
-        {event.displayDate} — по Питеру. <strong>Всегда по Питеру.</strong>
-        <br />
-        <span>{tzNote}</span>
+        <div className="meta-date">{event.displayDate}</div>
+        <div className="meta-location">Санкт-Петербург</div>
+        <div className="meta-tz">{tzNote}</div>
       </div>
 
       <hr className="divider reveal d5" />
+
+      <WaitCounter event={event} />
 
       <div className="about reveal d5">
         <div className="about-label">СПРАВКА</div>
@@ -162,8 +164,6 @@ export default function EventCountdown({ event }) {
           <p key={i}>{p}</p>
         ))}
       </div>
-
-      <WaitCounter event={event} />
 
       <div className="footer reveal d5">сделано Ниной, вроде бы.</div>
     </div>
