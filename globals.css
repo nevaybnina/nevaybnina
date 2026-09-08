@@ -222,6 +222,80 @@ body {
 
 .about p + p { margin-top: 10px; }
 
+/* ---- wait counter ("А нас сколько?") ---- */
+.wait-block {
+  margin-top: 56px;
+  max-width: 480px;
+}
+
+.wait-heading {
+  font-weight: 900;
+  font-size: clamp(28px, 6vw, 46px);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+}
+
+.wait-count {
+  margin-top: 14px;
+  display: inline-block;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(56px, 12vw, 92px);
+  line-height: 0.92;
+  color: var(--tomato);
+}
+
+.wait-count.tick {
+  animation: waitBump 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes waitBump {
+  0% { transform: scale(0.7) translateY(6px); opacity: 0.4; }
+  60% { transform: scale(1.08) translateY(-2px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); }
+}
+
+.wait-sub {
+  margin-top: 6px;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+  min-height: 20px;
+}
+
+.wait-button {
+  margin-top: 18px;
+  display: inline-block;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'Archivo', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 12px 22px;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+}
+
+.wait-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.wait-button:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+}
+
+.wait-button.joined {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1.5px solid var(--line);
+  cursor: default;
+}
+
+.wait-button:disabled {
+  cursor: default;
+}
+
 /* ---- footer ---- */
 .footer {
   margin-top: 60px;
@@ -244,4 +318,5 @@ body {
   .companion.bob { animation: none; }
   .companion .blink { animation: none; }
   .unit-value.tick { animation: none; }
+  .wait-count.tick { animation: none; }
 }

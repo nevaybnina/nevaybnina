@@ -4,7 +4,7 @@
 
 export const events = [
   {
-    slug: 'markswebb-rank-2026',
+    slug: 'markswebb-2026',
     headline: 'ЧЕГО ЖДЁМ?',
     eventName: 'Markswebb Mobile Web Banking Rank 2026',
     eventSub: 'Альфа-Онлайн хочет тут первое место. Мы тоже.',
