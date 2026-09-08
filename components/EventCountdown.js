@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { moscowToUTC } from '../data/events';
+import WaitCounter from './WaitCounter';
 
 const MOODS = {
   calm: 'Ну, время есть.',
@@ -161,6 +162,8 @@ export default function EventCountdown({ event }) {
           <p key={i}>{p}</p>
         ))}
       </div>
+
+      <WaitCounter event={event} />
 
       <div className="footer reveal d5">сделано Ниной, вроде бы.</div>
     </div>
