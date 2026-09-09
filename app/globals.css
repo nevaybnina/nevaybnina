@@ -27,7 +27,7 @@ body {
 .page {
   width: 100%;
   max-width: 840px;
-  padding: 28px 24px 60px;
+  padding: 24px 24px 40px;
 }
 
 /* ---- top bar ---- */
@@ -68,7 +68,7 @@ body {
 
 /* ---- headline block ---- */
 .headline-block {
-  margin-top: 56px;
+  margin-top: 40px;
 }
 
 .headline {
@@ -79,7 +79,7 @@ body {
 }
 
 .event-name {
-  margin-top: 20px;
+  margin-top: 16px;
   font-weight: 800;
   font-size: clamp(30px, 7vw, 68px);
   max-width: 640px;
@@ -88,7 +88,7 @@ body {
 }
 
 .event-sub {
-  margin-top: 14px;
+  margin-top: 8px;
   font-size: 15px;
   color: var(--ink-soft);
   max-width: 460px;
@@ -97,7 +97,7 @@ body {
 
 /* ---- countdown ---- */
 .timer {
-  margin-top: 54px;
+  margin-top: 40px;
   display: grid;
   grid-template-columns: repeat(4, auto);
   gap: 8px 34px;
@@ -122,7 +122,7 @@ body {
 }
 
 .unit-label {
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 11px;
   font-weight: 700;
   color: var(--muted);
@@ -131,10 +131,12 @@ body {
 
 /* ---- character + mood line ---- */
 .companion-row {
-  margin-top: 46px;
+  margin-top: 32px;
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
+  flex-wrap: wrap;
+  row-gap: 8px;
 }
 
 .companion {
@@ -219,11 +221,12 @@ body {
   padding: 10px 16px;
   border-radius: 3px 16px 16px 16px;
   transition: transform 0.2s ease;
+  max-width: 100%;
 }
 
 /* ---- meta / date + location ---- */
 .meta {
-  margin-top: 44px;
+  margin-top: 32px;
 }
 
 .meta-date {
@@ -240,7 +243,7 @@ body {
 }
 
 .meta-tz {
-  margin-top: 10px;
+  margin-top: 8px;
   font-size: 12.5px;
   color: var(--ink-soft);
   max-width: 380px;
@@ -249,7 +252,7 @@ body {
 
 /* ---- divider ---- */
 .divider {
-  margin: 52px 0 34px;
+  margin: 40px 0 24px;
   border: none;
   border-top: 2px solid var(--ink);
   width: 46px;
@@ -257,7 +260,7 @@ body {
 
 /* ---- about ---- */
 .about {
-  margin-top: 56px;
+  margin-top: 40px;
   max-width: 480px;
 }
 
@@ -265,7 +268,7 @@ body {
   font-size: 11px;
   font-weight: 700;
   color: var(--tomato);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .about p {
@@ -274,11 +277,11 @@ body {
   color: var(--ink-soft);
 }
 
-.about p + p { margin-top: 10px; }
+.about p + p { margin-top: 8px; }
 
-/* ---- wait counter ("Рђ РЅР°СЃ СЃРєРѕР»СЊРєРѕ?") ---- */
+/* ---- wait counter ("А нас сколько?") ---- */
 .wait-block {
-  margin-top: 56px;
+  margin-top: 0;
   max-width: 480px;
 }
 
@@ -290,7 +293,7 @@ body {
 }
 
 .wait-count {
-  margin-top: 14px;
+  margin-top: 8px;
   display: inline-block;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
@@ -310,14 +313,14 @@ body {
 }
 
 .wait-sub {
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 14.5px;
   color: var(--ink-soft);
   min-height: 20px;
 }
 
 .wait-button {
-  margin-top: 18px;
+  margin-top: 8px;
   display: inline-block;
   background: var(--ink);
   color: var(--paper);
@@ -352,7 +355,7 @@ body {
 
 /* ---- footer ---- */
 .footer {
-  margin-top: 60px;
+  margin-top: 40px;
   font-size: 12px;
   color: var(--muted);
   font-style: italic;
@@ -361,10 +364,9 @@ body {
 @media (max-width: 520px) {
   .timer {
     grid-template-columns: repeat(2, auto);
-    row-gap: 26px;
+    row-gap: 24px;
     column-gap: 40px;
   }
-  .companion-row { margin-top: 38px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
