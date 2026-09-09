@@ -172,6 +172,44 @@ body {
   50% { transform: translateY(-4px) rotate(-2deg); }
 }
 
+@keyframes shakeMild {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-2.5deg); }
+}
+
+@keyframes shakeMed {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-4deg); }
+  75% { transform: rotate(4deg); }
+}
+
+@keyframes shakeStrong {
+  0%, 100% { transform: rotate(0deg) translateX(0); }
+  20% { transform: rotate(-6deg) translateX(-2px); }
+  60% { transform: rotate(6deg) translateX(2px); }
+}
+
+@keyframes happyBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.companion.shake-mild {
+  animation: shakeMild 1.6s ease-in-out infinite;
+}
+
+.companion.shake-med {
+  animation: shakeMed 1s ease-in-out infinite;
+}
+
+.companion.shake-strong {
+  animation: shakeStrong 0.55s ease-in-out infinite;
+}
+
+.companion.bounce-happy {
+  animation: happyBounce 1.4s ease-in-out infinite;
+}
+
 .mood-bubble {
   position: relative;
   background: var(--ink);
@@ -238,7 +276,7 @@ body {
 
 .about p + p { margin-top: 10px; }
 
-/* ---- wait counter ("А нас сколько?") ---- */
+/* ---- wait counter ("Рђ РЅР°СЃ СЃРєРѕР»СЊРєРѕ?") ---- */
 .wait-block {
   margin-top: 56px;
   max-width: 480px;
@@ -332,6 +370,10 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .reveal { animation: none; opacity: 1; transform: none; }
   .companion.bob { animation: none; }
+  .companion.shake-mild { animation: none; }
+  .companion.shake-med { animation: none; }
+  .companion.shake-strong { animation: none; }
+  .companion.bounce-happy { animation: none; }
   .companion .blink { animation: none; }
   .unit-value.tick { animation: none; }
   .wait-count.tick { animation: none; }
