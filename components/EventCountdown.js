@@ -8,32 +8,87 @@ const MOODS = {
   calm: 'Ну, время есть.',
   mid: 'Ждём. Спокойно.',
   week: 'УЖЕ НЕДЕЛЯ.',
+  midweek: 'Пару дней осталось поволноваться.',
   tomorrow: 'ЗАВТРА.',
-  focused: 'УЖЕ.',
+  focused: 'Это случится уже сегодня.',
   done: 'ВСЁ.',
 };
 
-const MOUTHS = {
-  calm: 'M40 67 Q50 70 60 67',
-  mid: 'M40 66 Q50 72 60 66',
-  week: 'M40 64 Q50 74 60 64',
-  tomorrow: 'M38 62 Q50 76 62 62',
-  focused: 'M38 68 Q50 60 62 68',
-  done: 'M36 60 Q50 82 64 60',
+// Мордочка для «обычных» фаз — просто линии-брови (с поворотом) + круглые глаза + рот-дуга.
+// Фазы focused и done устроены по-другому (см. renderFace ниже), поэтому их тут нет.
+const SIMPLE_FACES = {
+  calm: {
+    browLeft: { x1: 30, y1: 40, x2: 44, y2: 36 },
+    browRight: { x1: 56, y1: 36, x2: 70, y2: 40 },
+    eyeR: 5.5,
+    mouth: 'M40 67 Q50 70 60 67',
+  },
+  mid: {
+    browLeft: { x1: 30, y1: 40, x2: 44, y2: 36 },
+    browRight: { x1: 56, y1: 36, x2: 70, y2: 40 },
+    eyeR: 5.5,
+    mouth: 'M40 66 Q50 72 60 66',
+  },
+  week: {
+    browLeft: { x1: 30, y1: 40, x2: 44, y2: 36, rotate: 8, pivot: [37, 38] },
+    browRight: { x1: 56, y1: 36, x2: 70, y2: 40, rotate: -8, pivot: [63, 38] },
+    eyeR: 5.5,
+    mouth: 'M40 64 Q50 72 60 64',
+  },
+  midweek: {
+    browLeft: { x1: 28, y1: 38, x2: 44, y2: 35, rotate: 20, pivot: [36, 36] },
+    browRight: { x1: 56, y1: 37, x2: 72, y2: 40, rotate: 6, pivot: [64, 38] },
+    eyeR: 5.5,
+    mouth: 'M39 66 Q43 62 47 66 Q51 70 55 66 Q59 62 62 66',
+  },
+  tomorrow: {
+    browLeft: { x1: 30, y1: 40, x2: 44, y2: 36, rotate: -14, pivot: [37, 38] },
+    browRight: { x1: 56, y1: 36, x2: 70, y2: 40, rotate: 14, pivot: [63, 38] },
+    eyeR: 6.5,
+    mouth: 'M38 62 Q50 76 62 62',
+  },
 };
 
-function phaseFor(diffMs) {
+// Какая CSS-анимация у корпуса персонажа в каждой фазе
+const COMPANION_CLASS = {
+  calm: 'bob',
+  mid: 'bob',
+  week: 'bob',
+  midweek: 'shake-mild',
+  tomorrow: 'shake-med',
+  focused: 'shake-strong',
+  done: 'bounce-happy',
+};
+
+// МСК = UTC+3 круглый год. Считаем разницу в ЦЕЛЫХ календарных днях по питерской дате —
+// так «завтра» и «неделя» наступают одновременно у всех зрителей, в какой бы стране они ни были.
+function daysUntilMoscow(eventUTC) {
+  const MSK = 3 * 3600 * 1000;
+  const now = new Date(Date.now() + MSK);
+  const ev = new Date(eventUTC + MSK);
+  const nowDay = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const evDay = Date.UTC(ev.getUTCFullYear(), ev.getUTCMonth(), ev.getUTCDate());
+  return Math.round((evDay - nowDay) / 86400000);
+}
+
+function phaseFor(diffMs, daysLeft) {
   if (diffMs <= 0) return 'done';
-  if (diffMs <= 3600 * 1000) return 'focused';
-  if (diffMs <= 24 * 3600 * 1000) return 'tomorrow';
-  if (diffMs <= 7 * 24 * 3600 * 1000) return 'week';
-  if (diffMs <= 30 * 24 * 3600 * 1000) return 'mid';
+  if (daysLeft <= 0) return 'focused';
+  if (daysLeft === 1) return 'tomorrow';
+  if (daysLeft >= 2 && daysLeft <= 6) return 'midweek';
+  if (daysLeft === 7) return 'week';
+  if (daysLeft >= 8 && daysLeft <= 30) return 'mid';
   return 'calm';
 }
 
 function pad(n) {
   return String(n).padStart(2, '0');
 }
+
+// ?debugPhase=focused в адресной строке — способ вручную посмотреть любую фазу,
+// не дожидаясь реальной даты. Работает только если значение — одна из настоящих фаз,
+// иначе просто игнорируется и всё считается как обычно.
+const VALID_PHASES = ['calm', 'mid', 'week', 'midweek', 'tomorrow', 'focused', 'done'];
 
 export default function EventCountdown({ event }) {
   const eventUTC = moscowToUTC(event.dateMoscow);
@@ -42,11 +97,23 @@ export default function EventCountdown({ event }) {
   const [tzNote, setTzNote] = useState('Определяем ваш часовой пояс…');
   const [eyeOffset, setEyeOffset] = useState({ x: 0, y: 0 });
   const companionRef = useRef(null);
+  const debugPhaseRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const dp = params.get('debugPhase');
+      if (dp && VALID_PHASES.includes(dp)) {
+        debugPhaseRef.current = dp;
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     function tick() {
       const diff = eventUTC - Date.now();
-      setPhase(phaseFor(diff));
+      const daysLeft = daysUntilMoscow(eventUTC);
+      setPhase(debugPhaseRef.current || phaseFor(diff, daysLeft));
 
       if (diff <= 0) {
         setTime({ d: '00', h: '00', m: '00', s: '00' });
@@ -93,8 +160,59 @@ export default function EventCountdown({ event }) {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  const isDone = phase === 'done';
   const pupilStyle = { transform: `translate(${eyeOffset.x}px, ${eyeOffset.y}px)` };
+
+  function brow(b) {
+    const transform = b.rotate ? `rotate(${b.rotate} ${b.pivot[0]} ${b.pivot[1]})` : undefined;
+    return (
+      <line
+        x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2}
+        stroke="#17140E" strokeWidth="4" strokeLinecap="round"
+        transform={transform}
+      />
+    );
+  }
+
+  function renderFace() {
+    if (phase === 'focused') {
+      return (
+        <>
+          <line x1="28" y1="38" x2="44" y2="32" stroke="#17140E" strokeWidth="4" strokeLinecap="round" transform="rotate(-20 36 35)" />
+          <line x1="56" y1="32" x2="72" y2="38" stroke="#17140E" strokeWidth="4" strokeLinecap="round" transform="rotate(20 64 35)" />
+          <g className="blink">
+            <circle className="pupil" cx="38" cy="50" r="7.5" fill="#17140E" style={pupilStyle} />
+            <circle className="pupil" cx="64" cy="50" r="7.5" fill="#17140E" style={pupilStyle} />
+          </g>
+          <circle cx="40" cy="47" r="1.6" fill="#F3EEE0" />
+          <circle cx="66" cy="47" r="1.6" fill="#F3EEE0" />
+          <circle cx="50" cy="69" r="3.5" fill="#17140E" />
+        </>
+      );
+    }
+    if (phase === 'done') {
+      return (
+        <>
+          <path d="M28 40 Q37 30 46 38" stroke="#17140E" strokeWidth="4" fill="none" strokeLinecap="round" />
+          <path d="M54 38 Q63 30 72 40" stroke="#17140E" strokeWidth="4" fill="none" strokeLinecap="round" />
+          <path d="M32 50 Q38 44 44 50" stroke="#17140E" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+          <path d="M56 50 Q62 44 68 50" stroke="#17140E" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+          <path d="M36 60 Q50 82 64 60" stroke="#17140E" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+        </>
+      );
+    }
+    const f = SIMPLE_FACES[phase] || SIMPLE_FACES.calm;
+    return (
+      <>
+        {brow(f.browLeft)}
+        {brow(f.browRight)}
+        <g className="blink">
+          <circle className="pupil" cx="38" cy="50" r={f.eyeR} fill="#17140E" style={pupilStyle} />
+          <circle className="pupil" cx="64" cy="50" r={f.eyeR} fill="#17140E" style={pupilStyle} />
+        </g>
+        <path d={f.mouth} stroke="#17140E" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+      </>
+    );
+  }
 
   return (
     <div className="page">
@@ -131,7 +249,7 @@ export default function EventCountdown({ event }) {
       <div className="companion-row reveal d4">
         <svg
           ref={companionRef}
-          className={`companion${isDone ? '' : ' bob'}`}
+          className={`companion ${COMPANION_CLASS[phase] || 'bob'}`}
           viewBox="0 0 100 100"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -139,11 +257,7 @@ export default function EventCountdown({ event }) {
             className="body-shape"
             d="M50 8C74 8 90 28 90 54C90 78 72 92 50 92C28 92 10 78 10 54C10 28 26 8 50 8Z"
           />
-          <g className="blink">
-            <circle className="pupil" cx="38" cy="50" r="5.5" style={pupilStyle} />
-            <circle className="pupil" cx="64" cy="50" r="5.5" style={pupilStyle} />
-          </g>
-          <path d={MOUTHS[phase]} stroke="#17140E" strokeWidth="3" fill="none" strokeLinecap="round" />
+          {renderFace()}
         </svg>
         <div className="mood-bubble">{MOODS[phase]}</div>
       </div>
