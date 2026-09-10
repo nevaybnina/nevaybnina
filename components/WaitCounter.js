@@ -17,6 +17,23 @@ function storageKey(slug) {
   return `nevaybnina:waited:${slug}`;
 }
 
+// Пробуем несколько раз с паузой перед тем, как сдаться — иначе разовый сетевой сбой
+// (особенно на нестабильных соединениях к .ru-домену) навсегда оставляет счётчик тире.
+async function fetchWithRetry(url, options, attempts = 3, delayMs = 600) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const res = await fetch(url, options);
+      if (res.ok) return res;
+    } catch (e) {
+      // сетевая ошибка — просто пробуем ещё раз ниже
+    }
+    if (i < attempts - 1) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs * (i + 1)));
+    }
+  }
+  return null;
+}
+
 export default function WaitCounter({ event }) {
   const [count, setCount] = useState(null);
   const [hasWaited, setHasWaited] = useState(false);
@@ -31,10 +48,10 @@ export default function WaitCounter({ event }) {
       setSubLine(REACTIONS[Math.floor(Math.random() * REACTIONS.length)]);
     }
 
-    fetch(`/api/wait?slug=${encodeURIComponent(event.slug)}`, { cache: 'no-store' })
-      .then((res) => res.json())
+    fetchWithRetry(`/api/wait?slug=${encodeURIComponent(event.slug)}`, { cache: 'no-store' })
+      .then((res) => (res ? res.json() : null))
       .then((data) => {
-        if (typeof data.count === 'number') setCount(data.count);
+        if (data && typeof data.count === 'number') setCount(data.count);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
