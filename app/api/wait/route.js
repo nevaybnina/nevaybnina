@@ -25,7 +25,7 @@ export async function GET(request) {
     .from('wait_counters')
     .select('count')
     .eq('event_slug', slug)
-    .single();
+    .maybeSingle();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
